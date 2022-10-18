@@ -62,7 +62,15 @@ print(joinedTriangles.draw())
 //: ## Returning an Opaque Type
 //:
 //: You can think of an opaque type like being the reverse of a generic type. Generic types let the code that calls a function pick the type for that function’s parameters and return value in a way that’s abstracted away from the function implementation. For example, the function in the following code returns a type that depends on its caller:
-func max<T>(_ x: T, _ y: T) -> T where T: Comparable { ... }
+func max<T>(_ x: T, _ y: T) -> T where T: Comparable {
+    if x > y {
+        return x
+    }
+    if y > x {
+        return y
+    }
+    return x
+}
 //: The code that calls max(_:_:) chooses the values for x and y, and the type of those values determines the concrete type of T. The calling code can use any type that conforms to the Comparable protocol. The code inside the function is written in a general way so it can handle whatever type the caller provides. The implementation of max(_:_:) uses only functionality that all Comparable types share.
 //:
 //: Those roles are reversed for a function with an opaque return type. An opaque type lets the function implementation pick the type for the value it returns in a way that’s abstracted away from the code that calls the function. For example, the function in the following example returns a trapezoid without exposing the underlying type of that shape.
@@ -116,14 +124,15 @@ print(opaqueJoinedTriangles.draw())
 //: The value of opaqueJoinedTriangles in this example is the same as joinedTriangles in the generics example in the The Problem That Opaque Types Solve section earlier in this chapter. However, unlike the value in that example, flip(_:) and join(_:_:) wrap the underlying types that the generic shape operations return in an opaque return type, which prevents those types from being visible. Both functions are generic because the types they rely on are generic, and the type parameters to the function pass along the type information needed by FlippedShape and JoinedShape.
 //:
 //: If a function with an opaque return type returns from multiple places, all of the possible return values must have the same type. For a generic function, that return type can use the function’s generic type parameters, but it must still be a single type. For example, here’s an invalid version of the shape-flipping function that includes a special case for squares:
-func invalidFlip<T: Shape>(_ shape: T) -> some Shape {
-    if shape is Square {
-        return shape // Error: return types don't match
-    }
-    return FlippedShape(shape: shape) // Error: return types don't match
-}
+// ⛔️ Compilation error: uncomment to view
+//func invalidFlip<T: Shape>(_ shape: T) -> some Shape {
+//    if shape is Square {
+//        return shape // Error: return types don't match
+//    }
+//    return FlippedShape(shape: shape) // Error: return types don't match
+//}
 //: If you call this function with a Square, it returns a Square; otherwise, it returns a FlippedShape. This violates the requirement to return values of only one type and makes invalidFlip(_:) invalid code. One way to fix invalidFlip(_:) is to move the special case for squares into the implementation of FlippedShape, which lets this function always return a FlippedShape value:
-struct FlippedShape<T: Shape>: Shape {
+struct FlippedShape2<T: Shape>: Shape {
     var shape: T
     func draw() -> String {
         if shape is Square {
@@ -145,21 +154,22 @@ func `repeat`<T: Shape>(shape: T, count: Int) -> some Collection {
 //:
 //: For example, here’s a version of flip(_:) that uses a protocol type as its return type instead of an opaque return type:
 func protoFlip<T: Shape>(_ shape: T) -> Shape {
-    return FlippedShape(shape: shape)
+    return FlippedShape2(shape: shape)
 }
 //: This version of protoFlip(_:) has the same body as flip(_:), and it always returns a value of the same type. Unlike flip(_:), the value that protoFlip(_:) returns isn’t required to always have the same type—it just has to conform to the Shape protocol. Put another way, protoFlip(_:) makes a much looser API contract with its caller than flip(_:) makes. It reserves the flexibility to return values of multiple types:
 
-func protoFlip<T: Shape>(_ shape: T) -> Shape {
+func protoFlip2<T: Shape>(_ shape: T) -> Shape {
     if shape is Square {
         return shape
     }
 
-    return FlippedShape(shape: shape)
+    return FlippedShape2(shape: shape)
 }
 //: The revised version of the code returns an instance of Square or an instance of FlippedShape, depending on what shape is passed in. Two flipped shapes returned by this function might have completely different types. Other valid versions of this function could return values of different types when flipping multiple instances of the same shape. The less specific return type information from protoFlip(_:) means that many operations that depend on type information aren’t available on the returned value. For example, it’s not possible to write an == operator comparing results returned by this function.
-let protoFlippedTriangle = protoFlip(smallTriangle)
-let sameThing = protoFlip(smallTriangle)
-protoFlippedTriangle == sameThing  // Error
+let protoFlippedTriangle = protoFlip2(smallTriangle)
+let sameThing = protoFlip2(smallTriangle)
+// ⛔️ Compilation error: uncomment to view
+//protoFlippedTriangle == sameThing  // Error
 //: The error on the last line of the example occurs for several reasons. The immediate issue is that the Shape doesn’t include an == operator as part of its protocol requirements. If you try adding one, the next issue you’ll encounter is that the == operator needs to know the types of its left-hand and right-hand arguments. This sort of operator usually takes arguments of type Self, matching whatever concrete type adopts the protocol, but adding a Self requirement to the protocol doesn’t allow for the type erasure that happens when you use the protocol as a type.
 //:
 //: Using a protocol type as the return type for a function gives you the flexibility to return any type that conforms to the protocol. However, the cost of that flexibility is that some operations aren’t possible on the returned values. The example shows how the == operator isn’t available—it depends on specific type information that isn’t preserved by using a protocol type.
@@ -174,21 +184,22 @@ protocol Container {
 }
 extension Array: Container { }
 //: You can’t use Container as the return type of a function because that protocol has an associated type. You also can’t use it as constraint in a generic return type because there isn’t enough information outside the function body to infer what the generic type needs to be.
+// ⛔️ Compilation error: uncomment to view
 // Error: Protocol with associated types can't be used as a return type.
-func makeProtocolContainer<T>(item: T) -> Container {
-    return [item]
-}
+//func makeProtocolContainer<T>(item: T) -> Container {
+//    return [item]
+//}
 
 // Error: Not enough information to infer C.
-func makeProtocolContainer<T, C: Container>(item: T) -> C {
-    return [item]
-}
+//func makeProtocolContainer2<T, C: Container>(item: T) -> C {
+//    return [item]
+//}
 //: Using the opaque type some Container as a return type expresses the desired API contract—the function returns a container, but declines to specify the container’s type:
 
-func makeOpaqueContainer<T>(item: T) -> some Container {
+func makeOpaqueContainer3<T>(item: T) -> some Container {
     return [item]
 }
-let opaqueContainer = makeOpaqueContainer(item: 12)
+let opaqueContainer = makeOpaqueContainer3(item: 12)
 let twelve = opaqueContainer[0]
 print(type(of: twelve))
 // Prints "Int"
