@@ -1,29 +1,13 @@
-![Swift](readme-images/swift-logo.png)
-
-Swift v5.7 | [Swift versions](find-my-swift-version.md) | [Swift.org](https://docs.swift.org).
-
-Taken from the [official Swift documentation](https://docs.swift.org/swift-book/LanguageGuide/TheBasics.html).
-
+![Swift](readme-images/swift-logo.png) 
 ![Xcode Playground](readme-images/xcode-icon.png)
-![Swift Playground Icon](readme-images/playground-file.png)
 
-👉 You can [view this document in Xcode](https://github.com/MatthewpHarding/SWIFTDOCS-24-opaque-types/archive/refs/heads/main.zip) to run and edit each example.
-## Run This File In Xcode
+# Page 24 [Opaque Types](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/opaquetypes)
 
-**Step 1:** Clone this repo or [download the files](https://github.com/MatthewpHarding/SWIFTDOCS-24-opaque-types/archive/refs/heads/main.zip).
+Swift v5.7 | [Swift.org](https://docs.swift.org) | [The official Swift Language Guide](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics) converted to Swift playgrounds.
 
-**Step 2:** In Xcode, ensure you have selected **Editor/Show Rendered Markup** to view the formatted instructions.
+The code attached is page 9 of [The official Swift Language Guide](https://docs.swift.org/swift-book/documentation/the-swift-programming-language/thebasics) converted to a Swift playground making every code example editable and executable. Try it by cloning or downloading the repo and opening the `.playground` file in Xcode.
 
-**Step 3:** You can edit the code within Xcode!  🎉
-
-🤩 *..let's live a better life, by learning Swift* 🛠
-
-```Swift
-let myLife = [learning, coding, happiness] 
-```
-### 🧕🏻👨🏿‍💼👩🏼‍💼👩🏻‍💻👨🏼‍💼🧛🏻‍♀️👩🏼‍💻💁🏽‍♂️🕵🏻‍♂️🧝🏼‍♀️🦹🏼‍♀🧕🏾🧟‍♂️
 -----------
-# *Page 24* → Opaque Types
 
 A function or method with an opaque return type hides its return value’s type information. Instead of providing a concrete type as the function’s return type, the return value is described in terms of the protocols it supports. Hiding type information is useful at boundaries between a module and code that calls into the module, because the underlying type of the return value can remain private. Unlike returning a value whose type is a protocol type, opaque types preserve type identity—the compiler has access to the type information, but clients of the module don’t.
 
